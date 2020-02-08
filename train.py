@@ -108,7 +108,7 @@ if args.cuda:
 # TODO: Initialize an optimizer from the torch.optim package using the
 # appropriate hyperparameters found in args. This only requires one line.
 #############################################################################
-pass
+optimizer = optim.Adam(model.parameters(), lr=args.lr)
 #############################################################################
 #                             END OF YOUR CODE                              #
 #############################################################################
@@ -131,7 +131,9 @@ def train(epoch):
         # TODO: Update the parameters in model using the optimizer from above.
         # This only requires a couple lines of code.
         #############################################################################
-        pass
+        loss = criterion(model.forward(images), targets)
+        loss.backward()
+        optimizer.step()
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
