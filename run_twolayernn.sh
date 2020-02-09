@@ -4,14 +4,14 @@
 #       number of epochs, weigh decay factor, momentum, batch size, learning 
 #       rate mentioned here to achieve good performance
 #############################################################################
-python -u train.py \
+python3 -u train.py \
     --model twolayernn \
-    --hidden-dim 10 \
-    --epochs 1 \
-    --weight-decay 0.0 \
-    --momentum 0.0 \
+    --hidden-dim 40 \
+    --epochs 20 \
+    --weight-decay 0.01 \
+    --momentum 0.9 \
     --batch-size 512 \
-    --lr 0.01 | tee twolayernn.log
+    --lr 0.00001 | tee twolayernn.log
 #############################################################################
 #                             END OF YOUR CODE                              #
 #############################################################################
