@@ -9,8 +9,8 @@ python3 -u train.py \
     --kernel-size 5  \
     --hidden-dim 64 \
     --epochs 20 \
-    --weight-decay 0\
-    --momentum 0 \
+    --weight-decay 0.1\
+    --momentum 0.9 \
     --batch-size 1024 \
     --lr 0.0001 | tee convnet.log
 

@@ -131,7 +131,8 @@ def train(epoch):
         # TODO: Update the parameters in model using the optimizer from above.
         # This only requires a couple lines of code.
         #############################################################################
-        loss = criterion(model.forward(images), targets)
+        loss = criterion(model(images), targets)
+        optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         #############################################################################

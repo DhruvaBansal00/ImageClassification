@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
-
+    
 
 class TwoLayerNN(nn.Module):
     def __init__(self, im_size, hidden_dim, n_classes):
@@ -51,7 +51,7 @@ class TwoLayerNN(nn.Module):
         images = images.view(-1, self.im_size)
         fc1_output = self.fc1(images)
         fc2_output = self.fc2(F.relu(fc1_output))
-        scores = F.softmax(fc2_output, dim=1)
+        scores = fc2_output
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
