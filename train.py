@@ -35,8 +35,12 @@ parser.add_argument('--model',
                     help='which model to train/evaluate')
 parser.add_argument('--hidden-dim', type=int,
                     help='number of hidden features/activations')
+parser.add_argument('--hidden-dim2', type=int,
+                    help='number of hidden features/activations', default=0)
 parser.add_argument('--kernel-size', type=int,
                     help='size of convolution kernels/filters')
+parser.add_argument('--kernel-size2', type=int,
+                    help='size of convolution kernels/filters', default=0)
 # Other configuration
 parser.add_argument('--no-cuda', action='store_true', default=False,
                     help='disables CUDA training')
@@ -95,8 +99,8 @@ elif args.model == 'convnet':
     model = models.convnet.CNN(im_size, args.hidden_dim, args.kernel_size,
                                n_classes)
 elif args.model == 'mymodel':
-    model = models.mymodel.MyModel(im_size, args.hidden_dim,
-                               args.kernel_size, n_classes)
+    model = models.mymodel.MyModel(im_size, args.hidden_dim, args.hidden_dim2,
+                               args.kernel_size, args.kernel_size2, n_classes)
 else:
     raise Exception('Unknown model {}'.format(args.model))
 # cross-entropy loss function

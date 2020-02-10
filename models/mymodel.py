@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 
 class MyModel(nn.Module):
-    def __init__(self, im_size, hidden_dim, kernel_size, n_classes):
+    def __init__(self, im_size, hidden_dim1, hidden_dim2, kernel_size1, kernel_size2, n_classes):
         '''
         Extra credit model
 
@@ -19,7 +19,11 @@ class MyModel(nn.Module):
         #############################################################################
         # TODO: Initialize anything you need for the forward pass
         #############################################################################
-        pass
+        self.cnv1 = nn.Conv2d(im_size[0], hidden_dim1, kernel_size1, stride=1)
+        self.cnv2 = nn.Conv2d(hidden_dim1, hidden_dim2, kernel_size2, stride=1)
+        output_size = hidden_dim2*int(((1 + 1 + im_size[-1] - kernel_size1 - kernel_size2)*(1 + 1 + im_size[-2] - kernel_size1 - kernel_size2))/9)
+        # print("OUTPUT SIZE = ", output_size)
+        self.fc1 = nn.Linear(output_size, n_classes)
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
@@ -44,7 +48,19 @@ class MyModel(nn.Module):
         #############################################################################
         # TODO: Implement the forward pass.
         #############################################################################
-        pass
+        cnv1_out = self.cnv1(images)
+        relu1_out = F.relu(cnv1_out)
+        # print(relu1_out.shape)
+        cnv2_out = self.cnv2(relu1_out)
+        relu2_out = F.relu(cnv2_out)
+        # print(relu2_out.shape)
+        pool = F.max_pool2d(relu2_out, 3, stride=3, padding=1)
+        # print(pool.shape)
+        image_size = pool.shape[-1]*pool.shape[-2]*pool.shape[-3]
+        # print("IMAGE SIZE = ", image_size)
+        fc_input = pool.view(-1, image_size)
+        fc1_out = self.fc1(fc_input)
+        scores = fc1_out
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
