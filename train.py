@@ -8,8 +8,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import transforms
+import torchvision
 from torch.autograd import Variable
 from cifar10 import CIFAR10
+
+import matplotlib.pyplot as plt
 
 # You should implement these (softmax.py, twolayernn.py, convnet.py)
 import models.softmax 
@@ -42,7 +45,7 @@ parser.add_argument('--kernel-size', type=int,
 parser.add_argument('--kernel-size2', type=int,
                     help='size of convolution kernels/filters', default=0)
 # Other configuration
-parser.add_argument('--no-cuda', action='store_true', default=False,
+parser.add_argument('--no-cuda', action='store_true', default=True,
                     help='disables CUDA training')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
                     help='random seed (default: 1)')
@@ -54,7 +57,7 @@ parser.add_argument('--cifar10-dir', default='data',
                     help='directory that contains cifar-10-batches-py/ '
                          '(downloaded automatically if necessary)')
 args = parser.parse_args()
-args.cuda = not args.no_cuda and torch.cuda.is_available()
+args.cuda = False
 torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
@@ -72,6 +75,7 @@ cifar10_mean_color = [0.49131522, 0.48209435, 0.44646862]
 # std dev of color across training images
 cifar10_std_color = [0.01897398, 0.03039277, 0.03872553]
 transform = transforms.Compose([
+                 transforms.Resize(size=(224, 224)),
                  transforms.ToTensor(),
                  transforms.Normalize(cifar10_mean_color, cifar10_std_color),
             ])
@@ -90,24 +94,45 @@ val_loader = torch.utils.data.DataLoader(val_dataset,
 test_loader = torch.utils.data.DataLoader(test_dataset,
                  batch_size=args.batch_size, shuffle=True, **kwargs)
 
-# Load the model
-if args.model == 'softmax':
+# def imshow(inp, title=None):
+#     inp = inp.numpy().transpose((1, 2, 0))
+#     mean = np.array(cifar10_mean_color)
+#     std = np.array(cifar10_std_color)
+#     inp = std * inp + mean
+#     inp = np.clip(inp, 0, 1)
+#     plt.imshow(inp)
+#     if title is not None:
+#         plt.title(title)
+#     plt.pause(0.001)  # Pause a bit so that plots are updated
+
+if args.model == 'mymodel':
+    # model = models.mymodel.MyModel(im_size, args.hidden_dim, args.hidden_dim2,
+    #                            args.kernel_size, args.kernel_size2, n_classes)
+    model = torchvision.models.vgg19(pretrained=True)
+    
+    # Modify the last layer
+    number_features = model.classifier[6].in_features
+    features = list(model.classifier.children())[:-1] # Remove last layer
+    for param in model.parameters():
+        param.requires_grad = False
+    features.extend([torch.nn.Linear(number_features, 10)])
+    model.classifier = torch.nn.Sequential(*features)
+
+    print(model)
+
+elif args.model == 'softmax':
     model = models.softmax.Softmax(im_size, n_classes)
 elif args.model == 'twolayernn':
     model = models.twolayernn.TwoLayerNN(im_size, args.hidden_dim, n_classes)
 elif args.model == 'convnet':
     model = models.convnet.CNN(im_size, args.hidden_dim, args.kernel_size,
                                n_classes)
-elif args.model == 'mymodel':
-    model = models.mymodel.MyModel(im_size, args.hidden_dim, args.hidden_dim2,
-                               args.kernel_size, args.kernel_size2, n_classes)
+    # model = models.mymodel.MyModel(im_size, args.hidden_dim, args.hidden_dim2,
+    #                            args.kernel_size, args.kernel_size2, n_classes)
 else:
     raise Exception('Unknown model {}'.format(args.model))
 # cross-entropy loss function
 criterion = F.cross_entropy
-if args.cuda:
-    model.cuda()
-
 #############################################################################
 # TODO: Initialize an optimizer from the torch.optim package using the
 # appropriate hyperparameters found in args. This only requires one line.
@@ -129,7 +154,9 @@ def train(epoch):
     for batch_idx, batch in enumerate(train_loader):
         # prepare data
         images, targets = Variable(batch[0]), Variable(batch[1])
-        if args.cuda:
+        print(images.shape)
+        # imshow(images[0])
+        if args.cuda:   
             images, targets = images.cuda(), targets.cuda()
         #############################################################################
         # TODO: Update the parameters in model using the optimizer from above.
@@ -187,12 +214,16 @@ def evaluate(split, verbose=False, n_batches=None):
 
 
 # train the model one epoch at a time
+
+
 for epoch in range(1, args.epochs + 1):
     train(epoch)
 evaluate('test', verbose=True)
 
 # Save the model (architecture and weights)
+
 torch.save(model, args.model + '.pt')
+
 # Later you can call torch.load(file) to re-load the trained model into python
 # See http://pytorch.org/docs/master/notes/serialization.html for more details
 

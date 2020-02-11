@@ -23,11 +23,11 @@ python3 -u train.py \
     --kernel-size 5 \
     --kernel-size2 5 \
     --hidden-dim 64 \
-    --hidden-dim2 128 \
+    --hidden-dim2 64 \
     --epochs 10 \
     --weight-decay 0.1 \
     --momentum 0.9 \
-    --batch-size 1024 \
+    --batch-size 50 \
     --lr 0.0001 | tee mymodel.log
 #############################################################################
 #                             END OF YOUR CODE                              #
