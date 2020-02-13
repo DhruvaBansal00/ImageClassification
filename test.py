@@ -21,10 +21,10 @@ parser.add_argument('--model',
 parser.add_argument('--test-dir', default='data',
                     help='directory that contains test_images.npy file '
                          '(downloaded automatically if necessary)')
-parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
-                    help='input batch size for testing (default: 1000)')
+parser.add_argument('--test-batch-size', type=int, default=50, metavar='N',
+                    help='input batch size for testing (default: 50)')
 parser.add_argument('--no-cuda', action='store_true', default=False,
-                    help='disables CUDA training')
+                    help='disables CUDA training')  
 args = parser.parse_args()
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 
@@ -36,6 +36,7 @@ cifar10_mean_color = [0.49131522, 0.48209435, 0.44646862]
 cifar10_std_color = [0.01897398, 0.03039277, 0.03872553]
 
 transform = transforms.Compose([
+				 transforms.Resize(size=(224, 224)),
                  transforms.ToTensor(),
                  transforms.Normalize(cifar10_mean_color, cifar10_std_color),
             ])
@@ -46,7 +47,7 @@ test_loader = torch.utils.data.DataLoader(test_dataset,
                  batch_size=args.test_batch_size, shuffle=False, **kwargs)
 
 if os.path.exists(args.model):
-    model = torch.load(args.model)
+    model = torch.load(args.model, map_location="cpu")
 else:
     print('Model path specified does not exst')
     sys.exit(1)

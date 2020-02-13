@@ -106,20 +106,12 @@ test_loader = torch.utils.data.DataLoader(test_dataset,
 #     plt.pause(0.001)  # Pause a bit so that plots are updated
 
 if args.model == 'mymodel':
-    # model = models.mymodel.MyModel(im_size, args.hidden_dim, args.hidden_dim2,
-    #                            args.kernel_size, args.kernel_size2, n_classes)
-    model = torchvision.models.vgg19(pretrained=True)
-    
-    # Modify the last layer
-    number_features = model.classifier[6].in_features
-    features = list(model.classifier.children())[:-1] # Remove last layer
-    for param in model.parameters():
-        param.requires_grad = False
-    features.extend([torch.nn.Linear(number_features, 10)])
-    model.classifier = torch.nn.Sequential(*features)
-
-    print(model)
-
+    model = models.mymodel.MyModel(im_size, args.hidden_dim, args.hidden_dim2,
+                               args.kernel_size, args.kernel_size2, n_classes)
+    # model = torchvision.models.resnet152(pretrained=True, progress=True)
+    # for param in model.parameters():
+    #     param.requires_grad = False
+    # model.fc = torch.nn.Linear(2048, 10)
 elif args.model == 'softmax':
     model = models.softmax.Softmax(im_size, n_classes)
 elif args.model == 'twolayernn':
@@ -130,6 +122,7 @@ elif args.model == 'convnet':
     # model = models.mymodel.MyModel(im_size, args.hidden_dim, args.hidden_dim2,
     #                            args.kernel_size, args.kernel_size2, n_classes)
 else:
+    # model = torch.load("transferLearning.pt", map_location="cpu")
     raise Exception('Unknown model {}'.format(args.model))
 # cross-entropy loss function
 criterion = F.cross_entropy
@@ -137,7 +130,7 @@ criterion = F.cross_entropy
 # TODO: Initialize an optimizer from the torch.optim package using the
 # appropriate hyperparameters found in args. This only requires one line.
 #############################################################################
-optimizer = optim.SGD(model.parameters(), lr=args.lr, weight_decay=args.weight_decay, momentum=args.momentum)
+optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 #############################################################################
 #                             END OF YOUR CODE                              #
 #############################################################################
@@ -218,6 +211,8 @@ def evaluate(split, verbose=False, n_batches=None):
 
 for epoch in range(1, args.epochs + 1):
     train(epoch)
+
+
 evaluate('test', verbose=True)
 
 # Save the model (architecture and weights)
